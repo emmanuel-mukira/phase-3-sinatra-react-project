@@ -3,7 +3,9 @@ class CreateHotels < ActiveRecord::Migration[6.1]
     create_table :hotels do |t|
       t.string :name
       t.string :location
-      t.text :amenities
+      t.string :address 
+      t.string :country
+      t.integer :star_rating
       t.decimal :price
       t.string :image_url 
     end

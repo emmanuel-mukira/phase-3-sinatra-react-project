@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(version: 2023_06_05_083530) do
     t.string "flight_number"
     t.string "departure_airpot"
     t.string "arrival_airport"
+    t.string "arrival_country"
     t.datetime "departure_time"
     t.decimal "price"
     t.string "image_url"
@@ -33,7 +34,9 @@ ActiveRecord::Schema.define(version: 2023_06_05_083530) do
   create_table "hotels", force: :cascade do |t|
     t.string "name"
     t.string "location"
-    t.text "amenities"
+    t.string "address"
+    t.string "country"
+    t.integer "star_rating"
     t.decimal "price"
     t.string "image_url"
   end

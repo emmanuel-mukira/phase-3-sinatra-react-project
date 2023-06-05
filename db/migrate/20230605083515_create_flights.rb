@@ -4,6 +4,7 @@ class CreateFlights < ActiveRecord::Migration[6.1]
      t.string :flight_number 
      t.string :departure_airpot 
      t.string :arrival_airport 
+     t.string :arrival_country
      t.datetime :departure_time
      t.decimal :price
      t.string :image_url

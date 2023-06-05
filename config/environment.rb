@@ -6,5 +6,8 @@ ENV['RACK_ENV'] ||= "development"
 require 'bundler/setup'
 Bundler.require(:default, ENV['RACK_ENV'])
 
+require 'dotenv/load'  # Load environment variables from .env file
+require 'net/http'
+
 # Require in all files in 'app' directory
 require_all 'app'
