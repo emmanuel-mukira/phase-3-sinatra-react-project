@@ -10,6 +10,11 @@ class ApplicationController < Sinatra::Base
     flights = Flight.all
     flights.to_json
   end
+  get '/flights/:id' do
+    flight = Flight.find(params[:id])
+    flight.to_json
+  end
+
 
   post '/flights' do
     flight = Flight.new(params)
@@ -35,6 +40,11 @@ class ApplicationController < Sinatra::Base
   get '/hotels' do
     hotels = Hotel.all
     hotels.to_json
+  end
+
+  get '/hotels/:id' do
+    hotel = Hotel.find(params[:id])
+    hotel.to_json
   end
 
   post '/flights' do
@@ -125,6 +135,33 @@ class ApplicationController < Sinatra::Base
     else
       status 404
       { error: 'Booking not found' }.to_json
+    end
+  end
+
+  post '/signUp' do
+    user = User.create(
+      name: params[:name],
+      email: params[:email],
+      password: params[:password]
+    )
+  
+    if user.valid?
+      status 201
+      user.to_json
+    else
+      status 400
+      { error: 'Failed to create user' }.to_json
+    end
+  end
+
+  post '/signIn' do
+    user = User.find_by(email: params[:email])
+  
+    if user && user.authenticate(params[:password])
+      { user_id: user.id }.to_json
+    else
+      status 401
+      { error: 'Invalid credentials' }.to_json
     end
   end
 
