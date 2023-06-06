@@ -1,5 +1,6 @@
 class Hotel < ActiveRecord::Base
     has_many :bookings
+    
     def fetch_hotel_image
        api_key = ENV['UNSPLASH_API_KEY']
         url = "https://api.unsplash.com/search/photos?query=#{CGI.escape(location)}&per_page=1&client_id=#{api_key}"
