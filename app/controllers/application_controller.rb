@@ -123,6 +123,7 @@ class ApplicationController < Sinatra::Base
       { error: 'Failed to create booking' }.to_json
     end
   end
+
   delete '/bookings/:id' do
     # Find the booking by ID
     booking = Booking.find(params[:id])
@@ -155,15 +156,16 @@ class ApplicationController < Sinatra::Base
   end
 
   post '/signIn' do
-    user = User.find_by(email: params[:email])
-  
-    if user && user.authenticate(params[:password])
-      { user_id: user.id }.to_json
+    user = User.authenticate(params[:email], params[:password])
+    
+    if user
+      { name: user.name }.to_json
     else
       status 401
       { error: 'Invalid credentials' }.to_json
     end
   end
+  
 
 
 end
