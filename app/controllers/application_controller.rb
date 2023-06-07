@@ -98,13 +98,17 @@ class ApplicationController < Sinatra::Base
   end
 
   get '/bookings' do
-    bookings = Booking.includes(flight: :bookings, hotel: :bookings).all
+    user_id = params[:user_id]
+  
+    # Perform the database query to fetch the bookings for the specified user_id
+    # Replace `your-query` with the actual query to retrieve bookings for a specific user
+    bookings = Booking.includes(flight: :bookings, hotel: :bookings).where(user_id: user_id).all
   
     bookings_data = bookings.map do |booking|
       {
         id: booking.id,
-        flight_name: booking.flight&.flight_number, # Use flight_number attribute from the Flight model
-        hotel_name: booking.hotel&.name, # Use name attribute from the Hotel model
+        flight_name: booking.flight&.flight_number,
+        hotel_name: booking.hotel&.name,
         status: booking.status,
         check_in_date: booking.check_in_date,
         check_out_date: booking.check_out_date
@@ -188,7 +192,7 @@ class ApplicationController < Sinatra::Base
     user = User.authenticate(params[:email], params[:password])
     
     if user
-      { name: user.name }.to_json
+      { user_id: user.id, name: user.name }.to_json
     else
       status 401
       { error: 'Invalid credentials' }.to_json
