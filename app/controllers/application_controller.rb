@@ -124,16 +124,16 @@ class ApplicationController < Sinatra::Base
   post '/bookings' do
     # Check if the user is authenticated and retrieve the currently logged-in user
     user = User.find_by(id: session[:user_id])
-    
+  
     if user
       # User is authenticated, proceed with creating the booking
-      
+  
       # Retrieve the selected flight and hotel IDs from the request parameters
       flight_id = params[:flight_id]
       hotel_id = params[:hotel_id]
-    
+  
       # Create the booking record
-      booking = Booking.create(
+      booking = Booking.new(
         user_id: user.id,
         flight_id: flight_id,
         hotel_id: hotel_id,
@@ -141,8 +141,8 @@ class ApplicationController < Sinatra::Base
         check_in_date: params[:check_in_date],
         check_out_date: params[:check_out_date]
       )
-    
-      if booking.valid?
+  
+      if booking.save
         status 201
         booking.to_json
       else
@@ -155,6 +155,7 @@ class ApplicationController < Sinatra::Base
       { error: 'Unauthorized' }.to_json
     end
   end
+  
   
 
   delete '/bookings/:id' do
