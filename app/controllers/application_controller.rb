@@ -97,32 +97,61 @@ class ApplicationController < Sinatra::Base
     end
   end
 
+  get '/bookings' do
+    bookings = Booking.includes(flight: :bookings, hotel: :bookings).all
+  
+    bookings_data = bookings.map do |booking|
+      {
+        id: booking.id,
+        flight_name: booking.flight&.flight_number, # Use flight_number attribute from the Flight model
+        hotel_name: booking.hotel&.name, # Use name attribute from the Hotel model
+        status: booking.status,
+        check_in_date: booking.check_in_date,
+        check_out_date: booking.check_out_date
+      }
+    end
+  
+    bookings_data.to_json
+  end
+  
+  
+  
+
   post '/bookings' do
-    # Retrieve the currently logged-in user ID
-    user_id = current_user.id
-  
-    # Extract the selected flight and hotel IDs from the request parameters
-    flight_id = params[:flight_id]
-    hotel_id = params[:hotel_id]
-  
-    # Create the booking record
-    booking = Booking.create(
-      user_id: user_id,
-      flight_id: flight_id,
-      hotel_id: hotel_id,
-      status: params[:status],
-      check_in_date: params[:check_in_date],
-      check_out_date: params[:check_out_date]
-    )
-  
-    if booking.valid?
-      status 201
-      booking.to_json
+    # Check if the user is authenticated and retrieve the currently logged-in user
+    user = User.find_by(id: session[:user_id])
+    
+    if user
+      # User is authenticated, proceed with creating the booking
+      
+      # Retrieve the selected flight and hotel IDs from the request parameters
+      flight_id = params[:flight_id]
+      hotel_id = params[:hotel_id]
+    
+      # Create the booking record
+      booking = Booking.create(
+        user_id: user.id,
+        flight_id: flight_id,
+        hotel_id: hotel_id,
+        status: params[:status],
+        check_in_date: params[:check_in_date],
+        check_out_date: params[:check_out_date]
+      )
+    
+      if booking.valid?
+        status 201
+        booking.to_json
+      else
+        status 400
+        { error: 'Failed to create booking' }.to_json
+      end
     else
-      status 400
-      { error: 'Failed to create booking' }.to_json
+      # User is not authenticated, return an error response
+      status 401
+      { error: 'Unauthorized' }.to_json
     end
   end
+  
 
   delete '/bookings/:id' do
     # Find the booking by ID
