@@ -47,25 +47,7 @@ class ApplicationController < Sinatra::Base
     hotel.to_json
   end
 
-  post '/flights' do
-    flight = Flight.create(
-      flight_number: params[:flight_number],
-      departure_airport: params[:departure_airport],
-      arrival_airport: params[:arrival_airport],
-      arrival_country: params[:arrival_country],
-      departure_time: params[:departure_time],
-      price: params[:price],
-      image_url: params[:image_url]
-    )
   
-    if flight.valid?
-      status 201
-      flight.to_json
-    else
-      status 400
-      { error: 'Failed to create flight' }.to_json
-    end
-  end
 
   post '/hotels' do
     hotel = Hotel.create(
@@ -100,9 +82,9 @@ class ApplicationController < Sinatra::Base
   get '/bookings' do
     user_id = params[:user_id]
   
-    # Perform the database query to fetch the bookings for the specified user_id
-    # Replace `your-query` with the actual query to retrieve bookings for a specific user
-    bookings = Booking.includes(flight: :bookings, hotel: :bookings).where(user_id: user_id).all
+    puts "User ID: #{user_id}"
+  
+    bookings = Booking.joins(:flight, :hotel).where(user_id: user_id)
   
     bookings_data = bookings.map do |booking|
       {
@@ -115,49 +97,50 @@ class ApplicationController < Sinatra::Base
       }
     end
   
+    puts "Bookings Data: #{bookings_data}"
+  
     bookings_data.to_json
   end
   
-  
-  
-
   post '/bookings' do
+    puts "Request Payload: #{params}"
+    
     # Check if the user is authenticated and retrieve the currently logged-in user
-    user = User.find_by(id: session[:user_id])
-  
-    if user
-      # User is authenticated, proceed with creating the booking
-  
-      # Retrieve the selected flight and hotel IDs from the request parameters
-      flight_id = params[:flight_id]
-      hotel_id = params[:hotel_id]
-  
-      # Create the booking record
-      booking = Booking.new(
-        user_id: user.id,
-        flight_id: flight_id,
-        hotel_id: hotel_id,
-        status: params[:status],
-        check_in_date: params[:check_in_date],
-        check_out_date: params[:check_out_date]
-      )
-  
-      if booking.save
+    user_id = session[:user_id]
+    flight_id = params[:flight_id]
+    hotel_id = params[:hotel_id]
+    
+    # Create the booking record
+    booking = Booking.new(
+      user_id: user_id,
+      flight_id: flight_id,
+      hotel_id: hotel_id,
+      status: params["status"],
+      check_in_date: params["check_in_date"],
+      check_out_date: params["check_out_date"]
+    )
+    
+    if booking.valid?
+      user = User.find_by(id: user_id)
+      if user && user.authenticate(params[:password])
+        booking.save
+        puts "Booking created successfully: #{booking.to_json}"
         status 201
         booking.to_json
       else
-        status 400
-        { error: 'Failed to create booking' }.to_json
+        puts 'Unauthorized'
+        status 401
+        { error: 'Unauthorized' }.to_json
       end
     else
-      # User is not authenticated, return an error response
-      status 401
-      { error: 'Unauthorized' }.to_json
+      puts "Failed to create booking: #{booking.errors}"
+      status 400
+      { error: 'Failed to create booking' }.to_json
     end
   end
   
   
-
+  
   delete '/bookings/:id' do
     # Find the booking by ID
     booking = Booking.find(params[:id])
@@ -193,6 +176,9 @@ class ApplicationController < Sinatra::Base
     user = User.authenticate(params[:email], params[:password])
     
     if user
+      session[:user_id] = user.id # Set the user ID in the session
+      puts "#{session[:user_id]}"
+      status 200
       { user_id: user.id, name: user.name }.to_json
     else
       status 401
