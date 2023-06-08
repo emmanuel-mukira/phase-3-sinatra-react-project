@@ -156,19 +156,16 @@ class ApplicationController < Sinatra::Base
   
   
   delete '/bookings/:id' do
-    # Find the booking by ID
-    booking = Booking.find(params[:id])
+    booking = Booking.find_by(id: params[:id])
   
     if booking
-      # Delete the booking
       booking.destroy
-      booking.to_json
-      status 204
+      status 204 # No content
     else
-      status 404
-      { error: 'Booking not found' }.to_json
+      status 404 # Not found
     end
   end
+  
 
   post '/signUp' do
     user = User.create(
