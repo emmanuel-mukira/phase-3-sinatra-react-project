@@ -104,40 +104,54 @@ class ApplicationController < Sinatra::Base
   
   post '/bookings' do
     puts "Request Payload: #{params}"
-    
+  
     # Check if the user is authenticated and retrieve the currently logged-in user
-    user_id = session[:user_id]
-    flight_id = params[:flight_id]
-    hotel_id = params[:hotel_id]
-    
-    # Create the booking record
-    booking = Booking.new(
-      user_id: user_id,
-      flight_id: flight_id,
-      hotel_id: hotel_id,
-      status: params["status"],
-      check_in_date: params["check_in_date"],
-      check_out_date: params["check_out_date"]
-    )
-    
-    if booking.valid?
-      user = User.find_by(id: user_id)
-      if user && user.authenticate(params[:password])
-        booking.save
-        puts "Booking created successfully: #{booking.to_json}"
-        status 201
-        booking.to_json
+    user_id = params[:user_id].to_i
+    flight_number = params[:flight_number]
+    hotel_name = params[:hotel_name]
+  
+    # Find the flight and hotel records based on the flight number and hotel name
+    flight = Flight.find_by(flight_number: flight_number)
+    hotel = Hotel.find_by(name: hotel_name)
+  
+    if flight && hotel
+      # Create the booking record
+      booking = Booking.new(
+        user_id: user_id,
+        flight_id: flight.id,
+        hotel_id: hotel.id,
+        status: params["status"],
+        check_in_date: params["check_in_date"],
+        check_out_date: params["check_out_date"]
+      )
+  
+      if booking.valid?
+        user = User.find_by(id: user_id)
+        if user
+          booking.save
+          puts "Booking created successfully: #{booking.to_json}"
+          status 201
+          booking.to_json
+        else
+          puts 'Unauthorized'
+          status 401
+          { error: 'Unauthorized' }.to_json
+        end
       else
-        puts 'Unauthorized'
-        status 401
-        { error: 'Unauthorized' }.to_json
+        puts "Failed to create booking: #{booking.errors}"
+        status 400
+        { error: 'Failed to create booking' }.to_json
       end
     else
-      puts "Failed to create booking: #{booking.errors}"
-      status 400
-      { error: 'Failed to create booking' }.to_json
+      puts 'Flight or hotel not found'
+      status 404
+      { error: 'Flight or hotel not found' }.to_json
     end
   end
+  
+  
+  
+  
   
   
   
