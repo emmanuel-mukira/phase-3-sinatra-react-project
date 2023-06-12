@@ -5,9 +5,8 @@
 ## Project Description
 The travel app is a web-based platform that simplifies the process of booking flights and hotels. It provides users with an intuitive interface to search for available flights and accommodations based on their preferences. Users can create accounts, view and manage their booked trips, and make new bookings. The app integrates with external APIs to fetch real-time data, ensuring accurate and up-to-date information. By streamlining travel planning and enhancing the user experience, the travel app aims to make trip booking convenient and efficient for users.
 
-## SCREENSHOTS
-- link 1
-- link 2
+## LINK TO FRONT-END REPO
+https://github.com/emmanuel-mukira/tembea-app-frontend
 
 
 ********
